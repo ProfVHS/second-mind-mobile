@@ -4,7 +4,7 @@ import React from "react";
 export const Button = (props) => {
   const { title, onPress, selected } = props;
   return (
-    <Pressable style={selected ? styles.buttonSelected : styles.button} onPress={onPress}>
+    <Pressable style={selected ? styles.button : styles.buttonSelected} onPress={onPress}>
       <Text style={styles.buttonText}>{title}</Text>
     </Pressable>
   );
