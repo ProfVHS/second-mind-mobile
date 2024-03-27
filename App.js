@@ -19,8 +19,10 @@ export default function App() {
     return <Text>Loading...</Text>;
   }
   return (
-    <NavigationContainer>
-      <Tabs />
-    </NavigationContainer>
+    <>
+      <NavigationContainer>
+        <Tabs />
+      </NavigationContainer>
+    </>
   );
 }
