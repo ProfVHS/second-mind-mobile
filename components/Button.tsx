@@ -1,10 +1,17 @@
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import React from "react";
 
-export const Button = (props) => {
-  const { title, onPress, selected } = props;
+interface ButtonProps {
+  title: string;
+  onPress: () => void;
+  selected: boolean;
+}
+
+export const Button = ({ title, onPress, selected }: ButtonProps) => {
   return (
-    <Pressable style={selected ? styles.button : styles.buttonSelected} onPress={onPress}>
+    <Pressable
+      style={selected ? styles.button : styles.buttonSelected}
+      onPress={onPress}>
       <Text style={styles.buttonText}>{title}</Text>
     </Pressable>
   );

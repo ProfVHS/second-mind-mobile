@@ -1,32 +1,49 @@
-import { StyleSheet, Text, SafeAreaView, TextInput, TouchableOpacity, Pressable, View, ToastAndroid, StatusBar } from "react-native";
+import {
+  StyleSheet,
+  Text,
+  SafeAreaView,
+  TextInput,
+  TouchableOpacity,
+  Pressable,
+  View,
+  ToastAndroid,
+  StatusBar,
+} from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import React, { useEffect, useState } from "react";
 import RNDateTimePicker from "@react-native-community/datetimepicker";
 import { format } from "date-fns";
+import { category, priority } from "../types";
 
-export const AddTaskScreen = ({ navigation }) => {
-  const [taskName, setTaskName] = useState("");
-  const [taskDescription, setTaskDescription] = useState("");
-  const [category, setCategory] = useState("work"); // ["work", "personal", "shopping"]
-  const [priority, setPriority] = useState("low"); // ["low", "medium", "high"]
+import { NavigationProp } from "@react-navigation/native";
+
+interface AddTaskScreenProps {
+  navigation: NavigationProp<any>;
+}
+
+export const AddTaskScreen = ({ navigation }: AddTaskScreenProps) => {
+  const [taskName, setTaskName] = useState<string>("");
+  const [taskDescription, setTaskDescription] = useState<string>("");
+  const [category, setCategory] = useState<category>("work");
+  const [priority, setPriority] = useState<priority>("low"); // ["low", "medium", "high"]
   const [date, setDate] = useState(new Date());
 
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
   const [isTimePickerVisible, setTimePickerVisibility] = useState(false);
 
-  const [errors, setErrors] = useState(); // ["taskName", "taskTime"]
+  const [errors, setErrors] = useState<null | "taskName" | "taskTime">(); // ["taskName", "taskTime"]
 
-  const handleTaskNameChange = (newTaskName) => {
+  const handleTaskNameChange = (newTaskName: string) => {
     setTaskName(newTaskName);
   };
-  const handleTaskDescriptionChange = (newTaskDescription) => {
+  const handleTaskDescriptionChange = (newTaskDescription: string) => {
     setTaskDescription(newTaskDescription);
   };
-  const handleDateChange = (newDate) => {
+  const handleDateChange = (newDate: Date) => {
     setDate(newDate);
     setDatePickerVisibility(false);
   };
-  const handleTimeChange = (newTime) => {
+  const handleTimeChange = (newTime: Date) => {
     const hour = newTime.getHours();
     const minute = newTime.getMinutes();
     const newDate = date;
@@ -49,7 +66,18 @@ export const AddTaskScreen = ({ navigation }) => {
   };
 
   const handleSubmitAddingTask = () => {
-    console.log("Task added - " + taskName + " " + taskDescription + " " + category + " " + priority + " " + date);
+    console.log(
+      "Task added - " +
+        taskName +
+        " " +
+        taskDescription +
+        " " +
+        category +
+        " " +
+        priority +
+        " " +
+        date
+    );
     if (taskName === "") {
       ToastAndroid.show("Task name cannot be empty", ToastAndroid.SHORT);
       setErrors("taskName");
@@ -79,25 +107,54 @@ export const AddTaskScreen = ({ navigation }) => {
       <SafeAreaView style={styles.container}>
         <Text style={styles.Header}>Adding new task</Text>
         <TextInput
-          style={[styles.input, errors === "taskName" ? styles.errorBorder : ""]}
+          style={[
+            styles.input,
+            errors === "taskName" ? styles.errorBorder : null,
+          ]}
           defaultValue={taskName}
           onChangeText={handleTaskNameChange}
           placeholder="Task name"
           placeholderTextColor="rgba(0, 0, 0, 0.2)"
         />
-        <TextInput style={styles.input} defaultValue={taskDescription} onChangeText={handleTaskDescriptionChange} placeholder="Short description" placeholderTextColor="rgba(0, 0, 0, 0.2)" />
+        <TextInput
+          style={styles.input}
+          defaultValue={taskDescription}
+          onChangeText={handleTaskDescriptionChange}
+          placeholder="Short description"
+          placeholderTextColor="rgba(0, 0, 0, 0.2)"
+        />
         <View style={styles.row}>
           <View style={styles.categoryPicker}>
             <Text style={styles.label}>Category</Text>
-            <Picker style={[styles.input, { marginTop: 0 }]} mode="dropdown" selectedValue={category} onValueChange={(itemValue, itemIndex) => setCategory(itemValue)}>
-              <Picker.Item fontFamily="Poppins-Bold" label="Work" value="work" />
-              <Picker.Item fontFamily="Poppins-Bold" label="Personal" value="personal" />
-              <Picker.Item fontFamily="Poppins-Bold" label="Shopping" value="shopping" />
+            <Picker
+              style={[styles.input, { marginTop: 0 }]}
+              mode="dropdown"
+              selectedValue={category}
+              onValueChange={(itemValue, itemIndex) => setCategory(itemValue)}>
+              <Picker.Item
+                fontFamily="Poppins-Bold"
+                label="Work"
+                value="work"
+              />
+              <Picker.Item
+                fontFamily="Poppins-Bold"
+                label="Personal"
+                value="personal"
+              />
+              <Picker.Item
+                fontFamily="Poppins-Bold"
+                label="Shopping"
+                value="shopping"
+              />
             </Picker>
           </View>
           <View style={styles.priorityPicker}>
             <Text style={styles.label}>Priority</Text>
-            <Picker style={[styles.input, { marginTop: 0 }]} mode="dropdown" selectedValue={priority} onValueChange={(itemValue, itemIndex) => setPriority(itemValue)}>
+            <Picker
+              style={[styles.input, { marginTop: 0 }]}
+              mode="dropdown"
+              selectedValue={priority}
+              onValueChange={(itemValue, itemIndex) => setPriority(itemValue)}>
               <Picker.Item label="Low" value="low" />
               <Picker.Item label="Medium" value="medium" />
               <Picker.Item label="High" value="high" />
@@ -106,26 +163,52 @@ export const AddTaskScreen = ({ navigation }) => {
         </View>
         <View style={styles.row}>
           <Pressable
-            style={[styles.datePicker, errors === "taskTime" ? styles.errorBorder : ""]}
+            style={[
+              styles.datePicker,
+              errors === "taskTime" ? styles.errorBorder : null,
+            ]}
             onPress={() => {
               setDatePickerVisibility(true);
             }}>
-            <Text style={styles.datePickerText}>{format(date, "dd MMMM yyyy")}</Text>
+            <Text style={styles.datePickerText}>
+              {format(date, "dd MMMM yyyy")}
+            </Text>
           </Pressable>
           <Pressable
-            style={[styles.timePicker, errors === "taskTime" ? styles.errorBorder : ""]}
+            style={[
+              styles.timePicker,
+              errors === "taskTime" ? styles.errorBorder : null,
+            ]}
             onPress={() => {
               setTimePickerVisibility(true);
             }}>
             <Text style={styles.timePickerText}>{format(date, "HH:mm")}</Text>
           </Pressable>
         </View>
-        {isDatePickerVisible && <RNDateTimePicker value={date} mode="date" display="spinner" onChange={(e, selectedDate) => handleDateChange(selectedDate)} />}
-        {isTimePickerVisible && <RNDateTimePicker value={date} mode="time" display="clock" onChange={(e, selectedTime) => handleTimeChange(selectedTime)} />}
-        <TouchableOpacity style={styles.button} onPress={() => handleSubmitAddingTask()}>
+        {isDatePickerVisible && (
+          <RNDateTimePicker
+            value={date}
+            mode="date"
+            display="spinner"
+            onChange={(e, selectedDate) => handleDateChange(selectedDate!)}
+          />
+        )}
+        {isTimePickerVisible && (
+          <RNDateTimePicker
+            value={date}
+            mode="time"
+            display="clock"
+            onChange={(e, selectedTime) => handleTimeChange(selectedTime!)}
+          />
+        )}
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => handleSubmitAddingTask()}>
           <Text style={styles.buttonText}>Add task</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.cancelButton} onPress={() => navigation.navigate("Home")}>
+        <TouchableOpacity
+          style={styles.cancelButton}
+          onPress={() => navigation.navigate("Home")}>
           <Text style={styles.cancelButtonText}>Cancel</Text>
         </TouchableOpacity>
       </SafeAreaView>
