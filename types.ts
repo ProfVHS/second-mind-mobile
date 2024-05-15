@@ -3,9 +3,10 @@ export type category = "work" | "personal" | "shopping";
 
 export type taskType = {
   id: number;
-  taskName: string;
-  taskDescription: string;
+  title: string;
+  description: string;
   category: category;
   priority: priority;
-  date: string;
+  DueDate: string;
+  isDone: boolean;
 };

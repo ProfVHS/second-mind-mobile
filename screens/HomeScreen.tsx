@@ -1,4 +1,11 @@
-import { View, Text, SafeAreaView, StyleSheet, StatusBar } from "react-native";
+import {
+  View,
+  Text,
+  SafeAreaView,
+  StyleSheet,
+  StatusBar,
+  FlatList,
+} from "react-native";
 import React, { useCallback, useEffect, useState } from "react";
 import { format } from "date-fns";
 import { Button } from "../components/Button";
@@ -70,11 +77,12 @@ export const HomeScreen = ({ navigation }: HomeScreenProps) => {
             selected={filter === "all"}
           />
         </View>
-        <View>
-          {tasks.map((task) => (
-            <Task key={task.id} task={task} />
-          ))}
-        </View>
+        <FlatList
+          style={styles.Tasks}
+          data={tasks}
+          renderItem={({ item }) => <Task task={item} />}
+          keyExtractor={(item) => item.id.toString()}
+        />
       </SafeAreaView>
     </>
   );
@@ -83,14 +91,14 @@ export const HomeScreen = ({ navigation }: HomeScreenProps) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
     padding: 20,
   },
   buttonsWrapper: {
-    flex: 1,
+    display: "flex",
     flexDirection: "row",
     justifyContent: "space-between",
     gap: 50,
+    marginBottom: 20,
   },
   DateText: {
     fontFamily: "Poppins-SemiBold",
@@ -100,5 +108,9 @@ const styles = StyleSheet.create({
   Header: {
     fontFamily: "Poppins-Bold",
     fontSize: 24,
+  },
+  Tasks: {
+    height: "100%",
+    width: "100%",
   },
 });
