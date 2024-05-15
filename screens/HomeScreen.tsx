@@ -81,7 +81,7 @@ export const HomeScreen = ({ navigation }: HomeScreenProps) => {
           style={styles.Tasks}
           data={tasks}
           renderItem={({ item }) => <Task task={item} />}
-          keyExtractor={(item) => item.id.toString()}
+          keyExtractor={(item) => item.id!.toString()}
         />
       </SafeAreaView>
     </>

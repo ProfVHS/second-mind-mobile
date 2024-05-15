@@ -10,18 +10,22 @@ import {
   StatusBar,
 } from "react-native";
 import { Picker } from "@react-native-picker/picker";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import RNDateTimePicker from "@react-native-community/datetimepicker";
 import { format } from "date-fns";
-import { category, priority } from "../types";
+import { category, priority, taskType } from "../types";
 
 import { NavigationProp } from "@react-navigation/native";
+import { SQLiteDatabase } from "expo-sqlite";
+import { addTask, connectToDatabase } from "../database/database";
 
 interface AddTaskScreenProps {
   navigation: NavigationProp<any>;
 }
 
 export const AddTaskScreen = ({ navigation }: AddTaskScreenProps) => {
+  const [database, setDatabase] = useState<SQLiteDatabase | null>(null);
+
   const [taskName, setTaskName] = useState<string>("");
   const [taskDescription, setTaskDescription] = useState<string>("");
   const [category, setCategory] = useState<category>("work");
@@ -32,6 +36,19 @@ export const AddTaskScreen = ({ navigation }: AddTaskScreenProps) => {
   const [isTimePickerVisible, setTimePickerVisibility] = useState(false);
 
   const [errors, setErrors] = useState<null | "taskName" | "taskTime">(); // ["taskName", "taskTime"]
+
+  const getDatabase = useCallback(async () => {
+    try {
+      const db = await connectToDatabase();
+      setDatabase(db);
+    } catch (error) {
+      console.error(error);
+    }
+  }, []);
+
+  useEffect(() => {
+    getDatabase();
+  }, [getDatabase]);
 
   const handleTaskNameChange = (newTaskName: string) => {
     setTaskName(newTaskName);
@@ -65,7 +82,7 @@ export const AddTaskScreen = ({ navigation }: AddTaskScreenProps) => {
     setErrors(null);
   };
 
-  const handleSubmitAddingTask = () => {
+  const handleSubmitAddingTask = async () => {
     console.log(
       "Task added - " +
         taskName +
@@ -90,6 +107,17 @@ export const AddTaskScreen = ({ navigation }: AddTaskScreenProps) => {
     }
 
     //TODO - add task to the database
+    const newTask: taskType = {
+      title: taskName,
+      description: taskDescription,
+      category: category,
+      priority: priority,
+      DueDate: date.toISOString(),
+      isDone: false,
+    };
+
+    await addTask(database!, newTask);
+
     resetInputs();
   };
 

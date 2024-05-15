@@ -22,10 +22,23 @@ export const createTables = async (db: SQLite.SQLiteDatabase) => {
   await db.execAsync(categoryTable);
 };
 
-export const insertData = async (db: SQLite.SQLiteDatabase) => {
-  const insertTodo = `INSERT INTO todo (title, description, priority, isDone, category, DueDate) VALUES ("test", "testest", "low", false, 0, "today");`;
-  const result = await db.execAsync(insertTodo);
-  console.log(result);
+export const addTask = async (db: SQLite.SQLiteDatabase, task: taskType) => {
+  console.log("Adding task to database");
+  const insertTodo = `INSERT INTO todo (title, description, priority, isDone, category, DueDate) VALUES (?, ?, ?, false, ?, ?);`;
+  try {
+    const result = await db.runAsync(
+      `INSERT INTO todo (title, description, priority, isDone, category, DueDate) VALUES (?, ?, ?, false, ?, ?);`,
+      `${task.title}`,
+      `${task.description}`,
+      `${task.priority}`,
+      0,
+      `${task.DueDate.toString()}`
+    );
+    console.log("Task added to database");
+    console.log(result);
+  } catch (e) {
+    console.error(e);
+  }
 };
 
 export const fetchData = async (
@@ -34,4 +47,9 @@ export const fetchData = async (
 ) => {
   const allRows = (await db.getAllAsync("SELECT * FROM todo")) as taskType[];
   setTasks(allRows);
+};
+
+export const deleteData = async (db: SQLite.SQLiteDatabase) => {
+  await db.runAsync("DROP TABLE todo;");
+  console.log("Deleted all data");
 };

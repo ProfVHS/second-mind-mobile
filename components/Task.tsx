@@ -8,11 +8,14 @@ import {
 import React from "react";
 import { taskType } from "../types";
 import { Shadow } from "react-native-shadow-2";
+import { addDays, formatDistance, formatDistanceToNow } from "date-fns";
 
 type TaskProps = {
   task: taskType;
 };
 export const Task = ({ task }: TaskProps) => {
+  const date = new Date(task.DueDate);
+  const timeLeft = formatDistanceToNow(date, { addSuffix: true });
   return (
     <View style={styles.container}>
       <Shadow
@@ -21,20 +24,20 @@ export const Task = ({ task }: TaskProps) => {
         stretch={true}
         style={styles.taskbox}>
         <View style={styles.content}>
-          <View style={styles.taskHeader}>
-            <View
-              style={[
-                styles.priorityDot,
-                task.priority === "high"
-                  ? styles.priorityHigh
-                  : task.priority === "medium"
-                  ? styles.priorityMedium
-                  : styles.priorityLow,
-              ]}></View>
+          <View
+            style={[
+              styles.priorityDot,
+              task.priority === "high"
+                ? styles.priorityHigh
+                : task.priority === "medium"
+                ? styles.priorityMedium
+                : styles.priorityLow,
+            ]}></View>
+          <View>
             <Text style={styles.taskName}>{task.title}</Text>
+            <Text style={styles.taskTimeLeft}>{timeLeft}</Text>
+            <Text style={styles.taskDescription}>{task.description}</Text>
           </View>
-          <Text style={styles.taskTimeLeft}>9 hours left</Text>
-          <Text style={styles.taskDescription}>{task.description}</Text>
           <Text style={styles.taskCategory}>Category</Text>
         </View>
       </Shadow>
@@ -53,6 +56,10 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     borderRadius: 10,
     padding: 10,
+
+    display: "flex",
+    flexDirection: "row",
+    gap: 10,
   },
   taskName: {
     fontSize: 20,
@@ -63,12 +70,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "500",
     color: "#A2A2A2",
-  },
-  taskHeader: {
-    display: "flex",
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
   },
   taskCategory: {
     fontSize: 12,
@@ -88,6 +89,7 @@ const styles = StyleSheet.create({
     width: 10,
     height: 10,
     borderRadius: 100,
+    marginVertical: 10,
   },
   priorityHigh: {
     backgroundColor: "#FC3BE8",

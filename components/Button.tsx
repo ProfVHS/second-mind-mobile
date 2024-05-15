@@ -4,7 +4,7 @@ import React from "react";
 interface ButtonProps {
   title: string;
   onPress: () => void;
-  selected: boolean;
+  selected?: boolean;
 }
 
 export const Button = ({ title, onPress, selected }: ButtonProps) => {
