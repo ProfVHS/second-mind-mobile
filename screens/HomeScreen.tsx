@@ -12,11 +12,13 @@ import { Button } from "../components/Button";
 import {
   connectToDatabase,
   createTables,
-  fetchData,
+  deleteTaskById,
+  getCategories,
+  getTasks,
 } from "../database/database";
 import { Task } from "../components/Task";
 import { NavigationProp } from "@react-navigation/native";
-import { taskType } from "../types";
+import { categoryType, taskType } from "../types";
 
 interface HomeScreenProps {
   navigation: NavigationProp<any>;
@@ -27,19 +29,17 @@ export const HomeScreen = ({ navigation }: HomeScreenProps) => {
   const date = format(new Date(), "dd MMMM, yyyy");
 
   const [tasks, setTasks] = useState<taskType[]>([]); // [id, taskName, taskDescription, category_id, priority, date]
+  const [categories, setCategories] = useState<categoryType[]>([]); // [id, categoryName
 
   const loadData = useCallback(async () => {
     try {
       const db = await connectToDatabase();
-      await createTables(db);
-      const todos = fetchData(db, setTasks);
-      //await insertData(db);
+      const todos = getTasks(db, setTasks);
+      const categories = getCategories(db, setCategories);
     } catch (error) {
       console.error(error);
     }
   }, []);
-
-  console.log("tasks", tasks);
 
   useEffect(() => {
     loadData();
@@ -49,38 +49,57 @@ export const HomeScreen = ({ navigation }: HomeScreenProps) => {
   useEffect(() => {
     const unsubscribe = navigation.addListener("focus", async () => {
       console.log("Home screen focused");
+      loadData();
     });
 
     return unsubscribe;
   }, []);
 
+  const handleDeleteTask = async (taskID: number) => {
+    const db = await connectToDatabase();
+    await deleteTaskById(db, taskID);
+    await loadData();
+  };
+
   return (
     <>
       <StatusBar barStyle="dark-content" backgroundColor="#fff" />
       <SafeAreaView style={styles.container}>
-        <Text style={styles.DateText}>{date}</Text>
-        <Text style={styles.Header}>Today's tasks</Text>
-        <View style={styles.buttonsWrapper}>
-          <Button
-            title="to do"
-            onPress={() => setFilter("todo")}
-            selected={filter === "todo"}
-          />
-          <Button
-            title="done"
-            onPress={() => setFilter("done")}
-            selected={filter === "done"}
-          />
-          <Button
-            title="all"
-            onPress={() => setFilter("all")}
-            selected={filter === "all"}
-          />
+        <View style={styles.Header}>
+          <Text style={styles.DateText}>{date}</Text>
+          <Text style={styles.Title}>Today's tasks</Text>
+          <View style={styles.buttonsWrapper}>
+            <Button
+              title="to do"
+              onPress={() => setFilter("todo")}
+              selected={filter === "todo"}
+            />
+            <Button
+              title="done"
+              onPress={() => setFilter("done")}
+              selected={filter === "done"}
+            />
+            <Button
+              title="all"
+              onPress={() => setFilter("all")}
+              selected={filter === "all"}
+            />
+          </View>
         </View>
         <FlatList
           style={styles.Tasks}
           data={tasks}
-          renderItem={({ item }) => <Task task={item} />}
+          renderItem={({ item }) => (
+            <Task
+              task={item}
+              onDelete={() => handleDeleteTask(item.id!)}
+              category={
+                categories.length > 0
+                  ? categories.find((c) => c.id === item.category)!.name
+                  : "Uncategorized"
+              }
+            />
+          )}
           keyExtractor={(item) => item.id!.toString()}
         />
       </SafeAreaView>
@@ -91,7 +110,6 @@ export const HomeScreen = ({ navigation }: HomeScreenProps) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
   },
   buttonsWrapper: {
     display: "flex",
@@ -106,6 +124,10 @@ const styles = StyleSheet.create({
     color: "#A2A2A2",
   },
   Header: {
+    marginTop: 20,
+    paddingHorizontal: 20,
+  },
+  Title: {
     fontFamily: "Poppins-Bold",
     fontSize: 24,
   },

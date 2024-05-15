@@ -110,7 +110,7 @@ export const AddTaskScreen = ({ navigation }: AddTaskScreenProps) => {
     const newTask: taskType = {
       title: taskName,
       description: taskDescription,
-      category: category,
+      category: 0,
       priority: priority,
       DueDate: date.toISOString(),
       isDone: false,

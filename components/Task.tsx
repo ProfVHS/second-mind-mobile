@@ -2,55 +2,101 @@ import {
   Pressable,
   StyleSheet,
   Text,
-  TouchableOpacity,
   View,
+  Image,
+  TouchableHighlight,
+  TouchableOpacity,
 } from "react-native";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { taskType } from "../types";
 import { Shadow } from "react-native-shadow-2";
 import { addDays, formatDistance, formatDistanceToNow } from "date-fns";
+import Animated, {
+  useSharedValue,
+  withSpring,
+  withTiming,
+} from "react-native-reanimated";
+import { connectToDatabase, deleteTaskById } from "../database/database";
 
 type TaskProps = {
   task: taskType;
+  category: string;
+  onDelete: () => void;
 };
-export const Task = ({ task }: TaskProps) => {
+export const Task = ({ task, category, onDelete }: TaskProps) => {
+  const leftPositionTask = useSharedValue(0);
+  const leftPositionOptions = useSharedValue(0);
+
+  const [isInEditMode, setIsInEditMode] = useState(false);
+
   const date = new Date(task.DueDate);
   const timeLeft = formatDistanceToNow(date, { addSuffix: true });
+
+  const handlePress = () => {
+    setIsInEditMode((prev) => !prev);
+  };
+
+  useEffect(() => {
+    leftPositionTask.value = withTiming(isInEditMode ? -75 : 0, {
+      duration: 200,
+    });
+    leftPositionOptions.value = withTiming(isInEditMode ? -75 : 0, {
+      duration: 200,
+    });
+  }, [isInEditMode]);
+
   return (
-    <View style={styles.container}>
-      <Shadow
-        distance={1}
-        offset={[0, 8]}
-        stretch={true}
-        style={styles.taskbox}>
-        <View style={styles.content}>
-          <View
-            style={[
-              styles.priorityDot,
-              task.priority === "high"
-                ? styles.priorityHigh
-                : task.priority === "medium"
-                ? styles.priorityMedium
-                : styles.priorityLow,
-            ]}></View>
-          <View>
-            <Text style={styles.taskName}>{task.title}</Text>
-            <Text style={styles.taskTimeLeft}>{timeLeft}</Text>
-            <Text style={styles.taskDescription}>{task.description}</Text>
+    <Animated.View style={{ left: leftPositionTask, position: "relative" }}>
+      <Pressable style={styles.container} onPress={handlePress}>
+        <Shadow distance={1} offset={[0, 4]} stretch={true}>
+          <View style={styles.content}>
+            <View
+              style={[
+                styles.priorityDot,
+                task.priority === "high"
+                  ? styles.priorityHigh
+                  : task.priority === "medium"
+                  ? styles.priorityMedium
+                  : styles.priorityLow,
+              ]}></View>
+            <View>
+              <Text style={styles.taskName}>{task.title}</Text>
+              <Text style={styles.taskTimeLeft}>{timeLeft}</Text>
+              <Text style={styles.taskDescription}>{task.description}</Text>
+            </View>
+            <Text style={styles.taskCategory}>{category}</Text>
           </View>
-          <Text style={styles.taskCategory}>Category</Text>
-        </View>
-      </Shadow>
-    </View>
+        </Shadow>
+        <Animated.View style={[styles.options, { right: leftPositionOptions }]}>
+          <TouchableOpacity
+            style={{ height: "50%" }}
+            onPress={() => onDelete()}>
+            <View style={styles.delete}>
+              <Image
+                source={require("../assets/DeleteIcon.png")}
+                style={styles.optionIcon}
+              />
+            </View>
+          </TouchableOpacity>
+          <TouchableOpacity style={{ height: "50%" }}>
+            <View style={styles.edit}>
+              <Image
+                source={require("../assets/EditIcon.png")}
+                style={styles.optionIcon}
+              />
+            </View>
+          </TouchableOpacity>
+        </Animated.View>
+      </Pressable>
+    </Animated.View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    padding: 6,
-  },
-  taskbox: {
-    marginVertical: 5,
+    position: "relative",
+    marginVertical: 8,
+    marginHorizontal: 6,
   },
   content: {
     backgroundColor: "#fff",
@@ -99,5 +145,35 @@ const styles = StyleSheet.create({
   },
   priorityLow: {
     backgroundColor: "#5DC5D3",
+  },
+  options: {
+    width: 85,
+    height: "100%",
+    position: "absolute",
+    borderRadius: 10,
+    zIndex: -1,
+  },
+  edit: {
+    height: "100%",
+    width: "100%",
+    backgroundColor: "#3B93FC",
+    borderBottomRightRadius: 10,
+
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  delete: {
+    height: "100%",
+    width: "100%",
+    backgroundColor: "#BA0B4A",
+    borderTopRightRadius: 10,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  optionIcon: {
+    marginLeft: 10,
+    height: 20,
+    resizeMode: "contain",
   },
 });

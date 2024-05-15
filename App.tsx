@@ -12,12 +12,7 @@ import { NavigationContainer } from "@react-navigation/native";
 
 import { Tabs } from "./navigation/Tabs";
 import { useCallback, useEffect } from "react";
-import {
-  connectToDatabase,
-  createTables,
-  fetchData,
-  insertData,
-} from "./database/database";
+import { connectToDatabase, createTables } from "./database/database";
 
 export default function App() {
   const [fontsLoaded] = useFonts({
@@ -26,6 +21,20 @@ export default function App() {
     "Poppins-SemiBold": Poppins_600SemiBold,
     "Poppins-Medium": Poppins_500Medium,
   });
+
+  const loadData = useCallback(async () => {
+    try {
+      const db = await connectToDatabase();
+      await createTables(db);
+    } catch (error) {
+      console.error(error);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
+
   if (!fontsLoaded) {
     return <Text>Loading...</Text>;
   }
