@@ -65,7 +65,14 @@ export const CategoriesScreen = ({ navigation }: CategoriesScreenProps) => {
     });
   };
 
-  const handleViewCategory = () => {};
+  const handleViewCategory = (id: number) => {
+    navigation.navigate("Categories", {
+      screen: "ViewCategory",
+      params: {
+        categoryID: { id: id, name: categories.find((c) => c.id === id)!.name },
+      },
+    });
+  };
 
   return (
     <>
@@ -84,7 +91,7 @@ export const CategoriesScreen = ({ navigation }: CategoriesScreenProps) => {
               category={item}
               onDelete={() => handleDeleteCategory(item.id!)}
               onEdit={() => handleEditCategory(item)}
-              onView={() => handleViewCategory()}
+              onView={() => handleViewCategory(item.id!)}
             />
           )}
         />

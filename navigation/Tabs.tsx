@@ -8,6 +8,7 @@ import { HomeStack } from "./HomeStack";
 import { useState } from "react";
 import { AddCategoryScreen } from "../screens/AddCategoryScreen";
 import { CategoriesStack } from "./CategoriesStack";
+import { ViewCategoryScreen } from "../screens/ViewCategoryScreen";
 
 const Tab = createBottomTabNavigator();
 

@@ -8,37 +8,39 @@ import {
   ActivityIndicator,
 } from "react-native";
 import React, { useCallback, useEffect, useState } from "react";
-import { format, set } from "date-fns";
+import { format } from "date-fns";
 import { Button } from "../components/Button";
 import {
   connectToDatabase,
-  createTables,
   deleteTaskById,
   getTasks,
   setTaskStatus,
 } from "../database/database";
 import { Task } from "../components/Task";
-import { NavigationProp } from "@react-navigation/native";
-import { categoryType, filter, taskType } from "../types";
-import { getCategories } from "../database/category";
+import { NavigationProp, RouteProp } from "@react-navigation/native";
+import { filter, taskType } from "../types";
+import { getTasksInCategory } from "../database/category";
 
-interface HomeScreenProps {
+interface ViewCategoryScreenProps {
   navigation: NavigationProp<any>;
+  route: RouteProp<any, any>;
 }
 
-export const HomeScreen = ({ navigation }: HomeScreenProps) => {
-  const [filter, setFilter] = useState<filter>("todo"); // ["all", "done", "todo]"
+export const ViewCategoryScreen = ({
+  navigation,
+  route,
+}: ViewCategoryScreenProps) => {
+  const categoryToView = route.params!.categoryID;
+  const [filter, setFilter] = useState<filter>("todo");
   const date = format(new Date(), "dd MMMM, yyyy");
 
-  const [tasks, setTasks] = useState<taskType[]>([]); // [id, taskName, taskDescription, category_id, priority, date]
-  const [categories, setCategories] = useState<categoryType[]>([]); // [id, categoryName
+  const [tasks, setTasks] = useState<taskType[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const loadData = useCallback(async () => {
     try {
       const db = await connectToDatabase();
-      const todos = getTasks(db, new Date(), filter, setTasks);
-      const categories = getCategories(db, setCategories);
+      await getTasksInCategory(db, filter, categoryToView.id, setTasks);
       setIsLoading(false);
     } catch (error) {
       console.error(error);
@@ -67,7 +69,7 @@ export const HomeScreen = ({ navigation }: HomeScreenProps) => {
 
   const handleEditTask = (task: taskType) => {
     console.log("Editing task", task);
-    navigation.navigate("Home", {
+    navigation.navigate("ViewCategory", {
       screen: "EditTask",
       params: { taskToEdit: task },
     });
@@ -76,7 +78,7 @@ export const HomeScreen = ({ navigation }: HomeScreenProps) => {
   const handleTaskStatusChange = async (task: taskType) => {
     const db = await connectToDatabase();
     await setTaskStatus(db, task.id!, !task.isDone);
-    await getTasks(db, new Date(), filter, setTasks);
+    await getTasksInCategory(db, filter, categoryToView.id, setTasks);
   };
 
   const handleChangeFilter = async (filter: filter) => {
@@ -84,7 +86,7 @@ export const HomeScreen = ({ navigation }: HomeScreenProps) => {
     setIsLoading(true);
     setTasks([]);
     const db = await connectToDatabase();
-    await getTasks(db, new Date(), filter, setTasks);
+    await getTasksInCategory(db, filter, categoryToView.id, setTasks);
     setIsLoading(false);
   };
 
@@ -94,7 +96,7 @@ export const HomeScreen = ({ navigation }: HomeScreenProps) => {
       <SafeAreaView style={styles.container}>
         <View style={styles.Header}>
           <Text style={styles.DateText}>{date}</Text>
-          <Text style={styles.Title}>Today's tasks</Text>
+          <Text style={styles.Title}>{categoryToView.name}'s tasks</Text>
           <View style={styles.buttonsWrapper}>
             <Button
               title="to do"
@@ -123,10 +125,7 @@ export const HomeScreen = ({ navigation }: HomeScreenProps) => {
                 onDelete={() => handleDeleteTask(item.id!)}
                 onEdit={() => handleEditTask(item)}
                 onStatusChange={() => handleTaskStatusChange(item)}
-                category={
-                  categories.find((c) => c.id === item.category)?.name ||
-                  "Uncategorized"
-                }
+                category={categoryToView.name}
               />
             )}
             keyExtractor={(item) => item.id!.toString()}

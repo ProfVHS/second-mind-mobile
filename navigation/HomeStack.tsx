@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet } from "react-native";
 import React from "react";
 import { createStackNavigator } from "@react-navigation/stack";
 import { HomeScreen } from "../screens/HomeScreen";
@@ -18,5 +18,3 @@ export const HomeStack = () => {
     </Stack.Navigator>
   );
 };
-
-const styles = StyleSheet.create({});

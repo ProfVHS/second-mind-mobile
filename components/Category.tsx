@@ -6,7 +6,7 @@ import {
   TouchableOpacity,
   Modal,
 } from "react-native";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { categoryType } from "../types";
 import { Shadow } from "react-native-shadow-2";
 import { formatDistanceToNow } from "date-fns";
@@ -38,6 +38,18 @@ export const Category = ({
     "Info"
   );
 
+  const loadCategory = useCallback(async () => {
+    try {
+      const db = await connectToDatabase();
+    } catch (error) {
+      console.error(error);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadCategory();
+  }, [loadCategory]);
+
   const swipeLeft = () => {
     const newCurrentState = currentState === "Info" ? "Edit" : "Info";
     setCurrentState(newCurrentState);
@@ -62,7 +74,9 @@ export const Category = ({
   }, [currentState]);
 
   return (
-    <Animated.View style={{ left: leftPositionTask, position: "relative" }}>
+    <Animated.View
+      style={{ left: leftPositionTask, position: "relative" }}
+      onLayout={loadCategory}>
       <GestureRecognizer
         style={styles.container}
         onSwipeLeft={swipeLeft}
@@ -70,18 +84,14 @@ export const Category = ({
         <Shadow distance={1} offset={[0, 4]} stretch={true}>
           <View style={styles.content}>
             <View style={styles.dot} />
-            <View>
-              <Text style={styles.categoryName}>{category.name}</Text>
-              <Text style={styles.tasksDone}>2 tasks done</Text>
-              <Text style={styles.tasksToDo}>4 tasks to do</Text>
-            </View>
+            <Text style={styles.categoryName}>{category.name}</Text>
           </View>
         </Shadow>
         <Animated.View style={[styles.options, { right: leftPositionOptions }]}>
           <TouchableOpacity style={{ height: "100%" }} onPress={() => onView()}>
             <View style={styles.done}>
               <Image
-                source={require("../assets/CancelIcon.png")}
+                source={require("../assets/ViewIcon.png")}
                 style={styles.optionIcon}
               />
             </View>
@@ -123,8 +133,11 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 10,
 
+    height: 75,
+
     display: "flex",
     flexDirection: "row",
+    alignItems: "center",
     gap: 10,
   },
   categoryName: {

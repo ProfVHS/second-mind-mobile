@@ -2,11 +2,8 @@ import * as SQLite from "expo-sqlite";
 import { filter, taskType } from "../types";
 
 export const connectToDatabase = async () => {
-  console.log("Connecting to database");
-
   try {
     const db = await SQLite.openDatabaseAsync("SecondMind");
-    console.log("Connected to database");
     return db;
   } catch (e) {
     console.log(e);
@@ -34,8 +31,6 @@ export const addTask = async (db: SQLite.SQLiteDatabase, task: taskType) => {
       task.category,
       `${task.DueDate.toString()}`
     );
-    console.log("Task added to database");
-    console.log(result);
   } catch (e) {
     console.error(e);
   }
@@ -49,9 +44,6 @@ export const getTasks = async (
 ) => {
   //const allRows = (await db.getAllAsync("SELECT * FROM todo")) as taskType[];
   const formatedDate = date.toISOString().split("T")[0];
-  console.log(formatedDate);
-
-  console.log("Getting tasks from database", filter);
 
   if (filter === "all") {
     const allRows = (await db.getAllAsync(
