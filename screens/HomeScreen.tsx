@@ -52,7 +52,8 @@ export const HomeScreen = ({ navigation }: HomeScreenProps) => {
   // on focus listener
   useEffect(() => {
     const unsubscribe = navigation.addListener("focus", async () => {
-      console.log("Home screen focused");
+      console.log("Home screen focused - " + filter);
+      setFilter("todo");
       loadData();
     });
 

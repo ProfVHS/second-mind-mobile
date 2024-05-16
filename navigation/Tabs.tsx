@@ -42,6 +42,7 @@ export const Tabs = () => {
         component={HomeStack}
         listeners={{ focus: () => setAddButtonScreen("TASK") }}
         options={{
+          unmountOnBlur: true,
           tabBarIcon: ({ focused }) => (
             <View>
               <Image
@@ -60,8 +61,11 @@ export const Tabs = () => {
       <Tab.Screen
         name="Categories"
         component={CategoriesStack}
-        listeners={{ focus: () => setAddButtonScreen("CATEGORY") }}
+        listeners={({ navigation, route }) => ({
+          focus: () => setAddButtonScreen("CATEGORY"),
+        })}
         options={{
+          unmountOnBlur: true,
           tabBarIcon: ({ focused }) => (
             <View>
               <Image

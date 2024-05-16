@@ -1,14 +1,20 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { createStackNavigator } from "@react-navigation/stack";
 import { CategoriesScreen } from "../screens/CategoriesScreen";
 import { EditCategoryScreen } from "../screens/EditCategoryScreen";
 import { CategoryViewStack } from "./CategoryViewStack";
+import { NavigationProp } from "@react-navigation/native";
 
 const Stack = createStackNavigator();
 
-export const CategoriesStack = () => {
+interface CategoriesStackProps {
+  navigation: NavigationProp<any>;
+}
+export const CategoriesStack = ({ navigation }: CategoriesStackProps) => {
   return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
+    <Stack.Navigator
+      screenOptions={{ headerShown: false }}
+      initialRouteName="CategoriesScreen">
       <Stack.Screen name="CategoriesScreen" component={CategoriesScreen} />
       <Stack.Screen
         name="EditCategory"
