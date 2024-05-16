@@ -1,20 +1,13 @@
-import {
-  StyleSheet,
-  View,
-  Image,
-  Settings,
-  TouchableOpacity,
-} from "react-native";
+import { StyleSheet, View, Image, TouchableOpacity } from "react-native";
 
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { HomeScreen } from "../screens/HomeScreen";
-import { CategoriesScreen } from "../screens/CategoriesScreen";
 import { CalendarScreen } from "../screens/CalendarScreen";
 import { SettingsScreen } from "../screens/SettingsScreen";
 import { AddTaskScreen } from "../screens/AddTaskScreen";
 import { HomeStack } from "./HomeStack";
-import { ReactElement, useState } from "react";
+import { useState } from "react";
 import { AddCategoryScreen } from "../screens/AddCategoryScreen";
+import { CategoriesStack } from "./CategoriesStack";
 
 const Tab = createBottomTabNavigator();
 
@@ -65,7 +58,7 @@ export const Tabs = () => {
       />
       <Tab.Screen
         name="Categories"
-        component={CategoriesScreen}
+        component={CategoriesStack}
         listeners={{ focus: () => setAddButtonScreen("CATEGORY") }}
         options={{
           tabBarIcon: ({ focused }) => (

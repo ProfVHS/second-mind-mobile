@@ -45,7 +45,14 @@ export const CategoriesScreen = ({ navigation }: CategoriesScreenProps) => {
 
   const handleDeleteCategory = () => {};
 
-  const handleEditCategory = () => {};
+  const handleEditCategory = (category: categoryType) => {
+    navigation.navigate("Categories", {
+      screen: "EditCategory",
+      params: {
+        categoryToEdit: category,
+      },
+    });
+  };
 
   const handleViewCategory = () => {};
 
@@ -65,7 +72,7 @@ export const CategoriesScreen = ({ navigation }: CategoriesScreenProps) => {
             <Category
               category={item}
               onDelete={() => handleDeleteCategory()}
-              onEdit={() => handleEditCategory()}
+              onEdit={() => handleEditCategory(item)}
               onView={() => handleViewCategory()}
             />
           )}

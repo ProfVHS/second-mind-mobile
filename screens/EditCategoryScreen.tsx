@@ -12,40 +12,32 @@ import {
 import React, { useCallback, useEffect, useState } from "react";
 import { categoryType } from "../types";
 
-import { NavigationProp } from "@react-navigation/native";
+import { NavigationProp, RouteProp } from "@react-navigation/native";
 import { connectToDatabase } from "../database/database";
-import { addCategory } from "../database/category";
+import { addCategory, editCategoryById } from "../database/category";
 
 interface AddCategoryScreenProps {
   navigation: NavigationProp<any>;
+  route: RouteProp<any, any>;
 }
 
-export const AddCategoryScreen = ({ navigation }: AddCategoryScreenProps) => {
+export const EditCategoryScreen = ({
+  navigation,
+  route,
+}: AddCategoryScreenProps) => {
+  const categoryToEdit = route.params!.categoryToEdit;
   const [categoryName, setCategoryName] = useState<string>("");
   const [error, setError] = useState<"tooShort" | "empty" | null>();
-
-  const getDatabase = useCallback(async () => {
-    try {
-      const db = await connectToDatabase();
-    } catch (error) {
-      console.error(error);
-    }
-  }, []);
-
-  useEffect(() => {
-    getDatabase();
-  }, [getDatabase]);
 
   const handleCategoryNameChange = (newCategoryName: string) => {
     setCategoryName(newCategoryName);
   };
 
   const resetInputs = () => {
-    setCategoryName("");
+    setCategoryName(categoryToEdit.name);
   };
 
-  // Adding category to database and navigating back to Home screen
-  const handleSubmitAddingCategory = async () => {
+  const handleSubmitEditCategory = async () => {
     if (categoryName === "") {
       ToastAndroid.show("Category name cannot be empty", ToastAndroid.SHORT);
       setError("empty");
@@ -65,7 +57,7 @@ export const AddCategoryScreen = ({ navigation }: AddCategoryScreenProps) => {
     };
 
     const db = await connectToDatabase();
-    addCategory(db, newCategory);
+    editCategoryById(db, categoryToEdit.id, newCategory);
 
     resetInputs();
     navigation.goBack();
@@ -93,12 +85,12 @@ export const AddCategoryScreen = ({ navigation }: AddCategoryScreenProps) => {
         />
         <TouchableOpacity
           style={styles.button}
-          onPress={() => handleSubmitAddingCategory()}>
-          <Text style={styles.buttonText}>Add category</Text>
+          onPress={() => handleSubmitEditCategory()}>
+          <Text style={styles.buttonText}>Edit category</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.cancelButton}
-          onPress={() => navigation.navigate("Home")}>
+          onPress={() => navigation.goBack()}>
           <Text style={styles.cancelButtonText}>Cancel</Text>
         </TouchableOpacity>
       </SafeAreaView>

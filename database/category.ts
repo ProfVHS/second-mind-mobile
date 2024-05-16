@@ -27,3 +27,19 @@ export const addCategory = async (
     console.error(e);
   }
 };
+
+export const editCategoryById = async (
+  db: SQLite.SQLiteDatabase,
+  id: number,
+  category: categoryType
+) => {
+  try {
+    await db.runAsync(
+      `UPDATE category SET name = ? WHERE id = ?;`,
+      `${category.name}`,
+      id
+    );
+  } catch (e) {
+    console.error(e);
+  }
+};
