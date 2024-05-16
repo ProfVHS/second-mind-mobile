@@ -119,6 +119,7 @@ export const AddTaskScreen = ({ navigation }: AddTaskScreenProps) => {
     await addTask(database!, newTask);
 
     resetInputs();
+    navigation.goBack();
   };
 
   // on focus listener

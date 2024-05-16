@@ -5,6 +5,7 @@ import {
   StyleSheet,
   StatusBar,
   FlatList,
+  ActivityIndicator,
 } from "react-native";
 import React, { useCallback, useEffect, useState } from "react";
 import { format } from "date-fns";
@@ -73,11 +74,12 @@ export const HomeScreen = ({ navigation }: HomeScreenProps) => {
   const handleTaskStatusChange = async (task: taskType) => {
     const db = await connectToDatabase();
     await setTaskStatus(db, task.id!, !task.isDone);
-    await loadData();
+    await getTasks(db, new Date(), filter, setTasks);
   };
 
   const handleChangeFilter = async (filter: filter) => {
     setFilter(filter);
+    setTasks([]);
     const db = await connectToDatabase();
     await getTasks(db, new Date(), filter, setTasks);
   };
@@ -107,24 +109,28 @@ export const HomeScreen = ({ navigation }: HomeScreenProps) => {
             />
           </View>
         </View>
-        <FlatList
-          style={styles.Tasks}
-          data={tasks}
-          renderItem={({ item }) => (
-            <Task
-              task={item}
-              onDelete={() => handleDeleteTask(item.id!)}
-              onEdit={() => handleEditTask(item)}
-              onStatusChange={() => handleTaskStatusChange(item)}
-              category={
-                categories.length > 0
-                  ? categories.find((c) => c.id === item.category)!.name
-                  : "Uncategorized"
-              }
-            />
-          )}
-          keyExtractor={(item) => item.id!.toString()}
-        />
+        {tasks.length > 0 ? (
+          <FlatList
+            style={styles.Tasks}
+            data={tasks}
+            renderItem={({ item }) => (
+              <Task
+                task={item}
+                onDelete={() => handleDeleteTask(item.id!)}
+                onEdit={() => handleEditTask(item)}
+                onStatusChange={() => handleTaskStatusChange(item)}
+                category={
+                  categories.length > 0
+                    ? categories.find((c) => c.id === item.category)!.name
+                    : "Uncategorized"
+                }
+              />
+            )}
+            keyExtractor={(item) => item.id!.toString()}
+          />
+        ) : (
+          <ActivityIndicator size="large" color="#FC69D3" />
+        )}
       </SafeAreaView>
     </>
   );

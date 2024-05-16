@@ -96,10 +96,17 @@ export const Task = ({
             style={{ height: "100%" }}
             onPress={() => onStatusChange()}>
             <View style={styles.done}>
-              <Image
-                source={require("../assets/DoneIcon.png")}
-                style={styles.optionIcon}
-              />
+              {task.isDone ? (
+                <Image
+                  source={require("../assets/CancelIcon.png")}
+                  style={styles.optionIcon}
+                />
+              ) : (
+                <Image
+                  source={require("../assets/DoneIcon.png")}
+                  style={styles.optionIcon}
+                />
+              )}
             </View>
           </TouchableOpacity>
           <View>
