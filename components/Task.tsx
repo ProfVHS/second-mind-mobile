@@ -17,37 +17,61 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 import { connectToDatabase, deleteTaskById } from "../database/database";
+import GestureRecognizer from "react-native-swipe-gestures";
 
 type TaskProps = {
   task: taskType;
   category: string;
   onDelete: () => void;
+  onEdit: () => void;
+  onStatusChange: () => void;
 };
-export const Task = ({ task, category, onDelete }: TaskProps) => {
+export const Task = ({
+  task,
+  category,
+  onDelete,
+  onEdit,
+  onStatusChange,
+}: TaskProps) => {
   const leftPositionTask = useSharedValue(0);
   const leftPositionOptions = useSharedValue(0);
 
-  const [isInEditMode, setIsInEditMode] = useState(false);
+  const [currentState, setCurrentState] = useState<"Edit" | "Done" | "Info">(
+    "Info"
+  );
 
   const date = new Date(task.DueDate);
   const timeLeft = formatDistanceToNow(date, { addSuffix: true });
 
-  const handlePress = () => {
-    setIsInEditMode((prev) => !prev);
+  const swipeLeft = () => {
+    const newCurrentState = currentState === "Info" ? "Edit" : "Info";
+    setCurrentState(newCurrentState);
+  };
+
+  const swipeRight = () => {
+    const newCurrentState = currentState === "Info" ? "Done" : "Info";
+    setCurrentState(newCurrentState);
   };
 
   useEffect(() => {
-    leftPositionTask.value = withTiming(isInEditMode ? -75 : 0, {
-      duration: 200,
-    });
-    leftPositionOptions.value = withTiming(isInEditMode ? -75 : 0, {
-      duration: 200,
-    });
-  }, [isInEditMode]);
+    leftPositionTask.value = withTiming(
+      currentState === "Info" ? 0 : currentState === "Edit" ? -75 : 75,
+      { duration: 200 }
+    );
+    leftPositionOptions.value = withTiming(
+      currentState === "Info" ? 0 : currentState === "Edit" ? -75 : 75,
+      {
+        duration: 200,
+      }
+    );
+  }, [currentState]);
 
   return (
     <Animated.View style={{ left: leftPositionTask, position: "relative" }}>
-      <Pressable style={styles.container} onPress={handlePress}>
+      <GestureRecognizer
+        style={styles.container}
+        onSwipeLeft={swipeLeft}
+        onSwipeRight={swipeRight}>
         <Shadow distance={1} offset={[0, 4]} stretch={true}>
           <View style={styles.content}>
             <View
@@ -69,25 +93,37 @@ export const Task = ({ task, category, onDelete }: TaskProps) => {
         </Shadow>
         <Animated.View style={[styles.options, { right: leftPositionOptions }]}>
           <TouchableOpacity
-            style={{ height: "50%" }}
-            onPress={() => onDelete()}>
-            <View style={styles.delete}>
+            style={{ height: "100%" }}
+            onPress={() => onStatusChange()}>
+            <View style={styles.done}>
               <Image
-                source={require("../assets/DeleteIcon.png")}
+                source={require("../assets/DoneIcon.png")}
                 style={styles.optionIcon}
               />
             </View>
           </TouchableOpacity>
-          <TouchableOpacity style={{ height: "50%" }}>
-            <View style={styles.edit}>
-              <Image
-                source={require("../assets/EditIcon.png")}
-                style={styles.optionIcon}
-              />
-            </View>
-          </TouchableOpacity>
+          <View>
+            <TouchableOpacity
+              style={{ height: "50%" }}
+              onPress={() => onDelete()}>
+              <View style={styles.delete}>
+                <Image
+                  source={require("../assets/DeleteIcon.png")}
+                  style={styles.optionIcon}
+                />
+              </View>
+            </TouchableOpacity>
+            <TouchableOpacity style={{ height: "50%" }} onPress={onEdit}>
+              <View style={styles.edit}>
+                <Image
+                  source={require("../assets/EditIcon.png")}
+                  style={styles.optionIcon}
+                />
+              </View>
+            </TouchableOpacity>
+          </View>
         </Animated.View>
-      </Pressable>
+      </GestureRecognizer>
     </Animated.View>
   );
 };
@@ -147,32 +183,50 @@ const styles = StyleSheet.create({
     backgroundColor: "#5DC5D3",
   },
   options: {
-    width: 85,
+    width: "100%",
     height: "100%",
     position: "absolute",
     borderRadius: 10,
     zIndex: -1,
+    flexDirection: "row",
+    justifyContent: "space-between",
   },
   edit: {
     height: "100%",
-    width: "100%",
+    width: 85,
+    paddingLeft: 10,
+
     backgroundColor: "#3B93FC",
     borderBottomRightRadius: 10,
 
     display: "flex",
+    alignSelf: "flex-end",
     alignItems: "center",
     justifyContent: "center",
   },
   delete: {
     height: "100%",
-    width: "100%",
+    width: 85,
+    paddingLeft: 10,
+
     backgroundColor: "#BA0B4A",
     borderTopRightRadius: 10,
+
+    alignSelf: "flex-end",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  done: {
+    height: "100%",
+    width: 85,
+    backgroundColor: "#d30c9e",
+    borderTopLeftRadius: 10,
+    borderBottomLeftRadius: 10,
+
     alignItems: "center",
     justifyContent: "center",
   },
   optionIcon: {
-    marginLeft: 10,
     height: 20,
     resizeMode: "contain",
   },

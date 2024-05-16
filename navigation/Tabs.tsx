@@ -12,6 +12,7 @@ import { CategoriesScreen } from "../screens/CategoriesScreen";
 import { CalendarScreen } from "../screens/CalendarScreen";
 import { SettingsScreen } from "../screens/SettingsScreen";
 import { AddTaskScreen } from "../screens/AddTaskScreen";
+import { HomeStack } from "./HomeStack";
 
 const Tab = createBottomTabNavigator();
 
@@ -38,7 +39,7 @@ export const Tabs = () => {
       }}>
       <Tab.Screen
         name="Home"
-        component={HomeScreen}
+        component={HomeStack}
         options={{
           tabBarIcon: ({ focused }) => (
             <View>

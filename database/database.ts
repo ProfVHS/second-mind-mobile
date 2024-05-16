@@ -1,5 +1,5 @@
 import * as SQLite from "expo-sqlite";
-import { categoryType, taskType } from "../types";
+import { categoryType, filter, taskStatus, taskType } from "../types";
 
 export const connectToDatabase = async () => {
   console.log("Connecting to database");
@@ -43,10 +43,29 @@ export const addTask = async (db: SQLite.SQLiteDatabase, task: taskType) => {
 
 export const getTasks = async (
   db: SQLite.SQLiteDatabase,
+  date: Date,
+  filter: filter,
   setTasks: (tasks: taskType[]) => void
 ) => {
-  const allRows = (await db.getAllAsync("SELECT * FROM todo")) as taskType[];
-  setTasks(allRows);
+  //const allRows = (await db.getAllAsync("SELECT * FROM todo")) as taskType[];
+  const formatedDate = date.toISOString().split("T")[0];
+  console.log(formatedDate);
+
+  console.log("Getting tasks from database", filter);
+
+  if (filter === "all") {
+    const allRows = (await db.getAllAsync(
+      `SELECT * FROM todo WHERE DueDate LIKE '${formatedDate}%'`,
+      formatedDate
+    )) as taskType[];
+    setTasks(allRows);
+  } else {
+    const allRows = (await db.getAllAsync(
+      `SELECT * FROM todo WHERE DueDate LIKE '${formatedDate}%' AND isDone = ?`,
+      filter === "done" ? 1 : 0
+    )) as taskType[];
+    setTasks(allRows);
+  }
 };
 
 export const getCategories = async (
@@ -62,6 +81,29 @@ export const getCategories = async (
 
 export const deleteTaskById = async (db: SQLite.SQLiteDatabase, id: number) => {
   await db.runAsync("DELETE FROM todo WHERE id = ?;", id);
+};
+
+export const editTaskById = async (
+  db: SQLite.SQLiteDatabase,
+  id: number,
+  task: taskType
+) => {
+  await db.runAsync(
+    "UPDATE todo SET title = ?, description = ?, priority = ?, DueDate = ? WHERE id = ?;",
+    task.title,
+    task.description,
+    task.priority,
+    task.DueDate,
+    id
+  );
+};
+
+export const setTaskStatus = async (
+  db: SQLite.SQLiteDatabase,
+  id: number,
+  status: boolean
+) => {
+  await db.runAsync("UPDATE todo SET isDone = ? WHERE id = ?;", status, id);
 };
 
 export const deleteData = async (db: SQLite.SQLiteDatabase) => {

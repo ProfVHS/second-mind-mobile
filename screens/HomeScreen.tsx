@@ -15,17 +15,18 @@ import {
   deleteTaskById,
   getCategories,
   getTasks,
+  setTaskStatus,
 } from "../database/database";
 import { Task } from "../components/Task";
 import { NavigationProp } from "@react-navigation/native";
-import { categoryType, taskType } from "../types";
+import { categoryType, filter, taskType } from "../types";
 
 interface HomeScreenProps {
   navigation: NavigationProp<any>;
 }
 
 export const HomeScreen = ({ navigation }: HomeScreenProps) => {
-  const [filter, setFilter] = useState("todo"); // ["all", "done", "todo]"
+  const [filter, setFilter] = useState<filter>("todo"); // ["all", "done", "todo]"
   const date = format(new Date(), "dd MMMM, yyyy");
 
   const [tasks, setTasks] = useState<taskType[]>([]); // [id, taskName, taskDescription, category_id, priority, date]
@@ -34,7 +35,7 @@ export const HomeScreen = ({ navigation }: HomeScreenProps) => {
   const loadData = useCallback(async () => {
     try {
       const db = await connectToDatabase();
-      const todos = getTasks(db, setTasks);
+      const todos = getTasks(db, new Date(), filter, setTasks);
       const categories = getCategories(db, setCategories);
     } catch (error) {
       console.error(error);
@@ -61,6 +62,26 @@ export const HomeScreen = ({ navigation }: HomeScreenProps) => {
     await loadData();
   };
 
+  const handleEditTask = (task: taskType) => {
+    console.log("Editing task", task);
+    navigation.navigate("Home", {
+      screen: "EditTask",
+      params: { taskToEdit: task },
+    });
+  };
+
+  const handleTaskStatusChange = async (task: taskType) => {
+    const db = await connectToDatabase();
+    await setTaskStatus(db, task.id!, !task.isDone);
+    await loadData();
+  };
+
+  const handleChangeFilter = async (filter: filter) => {
+    setFilter(filter);
+    const db = await connectToDatabase();
+    await getTasks(db, new Date(), filter, setTasks);
+  };
+
   return (
     <>
       <StatusBar barStyle="dark-content" backgroundColor="#fff" />
@@ -71,17 +92,17 @@ export const HomeScreen = ({ navigation }: HomeScreenProps) => {
           <View style={styles.buttonsWrapper}>
             <Button
               title="to do"
-              onPress={() => setFilter("todo")}
+              onPress={() => handleChangeFilter("todo")}
               selected={filter === "todo"}
             />
             <Button
               title="done"
-              onPress={() => setFilter("done")}
+              onPress={() => handleChangeFilter("done")}
               selected={filter === "done"}
             />
             <Button
               title="all"
-              onPress={() => setFilter("all")}
+              onPress={() => handleChangeFilter("all")}
               selected={filter === "all"}
             />
           </View>
@@ -93,6 +114,8 @@ export const HomeScreen = ({ navigation }: HomeScreenProps) => {
             <Task
               task={item}
               onDelete={() => handleDeleteTask(item.id!)}
+              onEdit={() => handleEditTask(item)}
+              onStatusChange={() => handleTaskStatusChange(item)}
               category={
                 categories.length > 0
                   ? categories.find((c) => c.id === item.category)!.name

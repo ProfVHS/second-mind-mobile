@@ -1,5 +1,7 @@
 export type priority = "low" | "medium" | "high";
 export type category = "work" | "personal" | "shopping";
+export type filter = "all" | "done" | "todo";
+export type taskStatus = "done" | "todo";
 
 export type categoryType = {
   id?: number;
