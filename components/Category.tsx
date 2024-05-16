@@ -1,4 +1,11 @@
-import { StyleSheet, Text, View, Image, TouchableOpacity } from "react-native";
+import {
+  StyleSheet,
+  Text,
+  View,
+  Image,
+  TouchableOpacity,
+  Modal,
+} from "react-native";
 import React, { useEffect, useState } from "react";
 import { categoryType } from "../types";
 import { Shadow } from "react-native-shadow-2";
@@ -10,6 +17,7 @@ import Animated, {
 } from "react-native-reanimated";
 import { connectToDatabase, deleteTaskById } from "../database/database";
 import GestureRecognizer from "react-native-swipe-gestures";
+import { ModalAlert } from "./ModalAlert";
 
 type CategoryProps = {
   category: categoryType;

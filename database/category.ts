@@ -43,3 +43,12 @@ export const editCategoryById = async (
     console.error(e);
   }
 };
+
+export const deleteCategoryById = async (
+  db: SQLite.SQLiteDatabase,
+  id: number
+) => {
+  console.log("Deleting category from database");
+  await db.runAsync("DELETE FROM todo WHERE category = ?;", id);
+  await db.runAsync("DELETE FROM category WHERE id = ?;", id);
+};
