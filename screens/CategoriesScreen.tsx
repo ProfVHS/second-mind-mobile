@@ -1,13 +1,75 @@
-import { View, Text, SafeAreaView, StyleSheet, StatusBar } from "react-native";
-import React from "react";
+import {
+  View,
+  Text,
+  SafeAreaView,
+  StyleSheet,
+  StatusBar,
+  FlatList,
+} from "react-native";
+import React, { useCallback, useEffect, useState } from "react";
+import { connectToDatabase } from "../database/database";
+import { getCategories } from "../database/category";
+import { categoryType } from "../types";
+import { Category } from "../components/Category";
+import { NavigationProp } from "@react-navigation/native";
 
-export const CategoriesScreen = () => {
+interface CategoriesScreenProps {
+  navigation: NavigationProp<any>;
+}
+
+export const CategoriesScreen = ({ navigation }: CategoriesScreenProps) => {
+  const [categories, setCategories] = useState<categoryType[]>([]); // [id, categoryName]
+
+  const loadData = useCallback(async () => {
+    try {
+      const db = await connectToDatabase();
+      await getCategories(db, setCategories);
+    } catch (error) {
+      console.error(error);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
+
+  // on focus listener
+  useEffect(() => {
+    const unsubscribe = navigation.addListener("focus", async () => {
+      console.log("Home screen focused");
+      loadData();
+    });
+
+    return unsubscribe;
+  }, []);
+
+  const handleDeleteCategory = () => {};
+
+  const handleEditCategory = () => {};
+
+  const handleViewCategory = () => {};
+
   return (
     <>
       <StatusBar barStyle="dark-content" backgroundColor="#fff" />
       <SafeAreaView style={styles.container}>
-        <Text style={styles.DateText}>You have 3 categories</Text>
-        <Text style={styles.Header}>Your categories</Text>
+        <View style={styles.Header}>
+          <Text style={styles.DateText}>
+            You have {categories.length} categories
+          </Text>
+          <Text style={styles.Title}>Your categories</Text>
+        </View>
+        <FlatList
+          data={categories}
+          renderItem={({ item }) => (
+            <Category
+              category={item}
+              onDelete={() => handleDeleteCategory()}
+              onEdit={() => handleEditCategory()}
+              onView={() => handleViewCategory()}
+            />
+          )}
+        />
       </SafeAreaView>
     </>
   );
@@ -16,8 +78,7 @@ export const CategoriesScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
-    padding: 20,
+    backgroundColor: "#F7F7F7",
   },
   buttonsWrapper: {
     flex: 1,
@@ -31,6 +92,10 @@ const styles = StyleSheet.create({
     color: "#A2A2A2",
   },
   Header: {
+    marginTop: 20,
+    paddingHorizontal: 20,
+  },
+  Title: {
     fontFamily: "Poppins-Bold",
     fontSize: 24,
   },

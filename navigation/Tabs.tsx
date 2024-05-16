@@ -13,6 +13,8 @@ import { CalendarScreen } from "../screens/CalendarScreen";
 import { SettingsScreen } from "../screens/SettingsScreen";
 import { AddTaskScreen } from "../screens/AddTaskScreen";
 import { HomeStack } from "./HomeStack";
+import { ReactElement, useState } from "react";
+import { AddCategoryScreen } from "../screens/AddCategoryScreen";
 
 const Tab = createBottomTabNavigator();
 
@@ -30,6 +32,10 @@ const TabBarCustomButton = ({ children, onPress }: TabBarCustomButtonProps) => (
 );
 
 export const Tabs = () => {
+  const [addButtonScreen, setAddButtonScreen] = useState<"TASK" | "CATEGORY">(
+    "TASK"
+  );
+
   return (
     <Tab.Navigator
       screenOptions={{
@@ -40,6 +46,7 @@ export const Tabs = () => {
       <Tab.Screen
         name="Home"
         component={HomeStack}
+        listeners={{ focus: () => setAddButtonScreen("TASK") }}
         options={{
           tabBarIcon: ({ focused }) => (
             <View>
@@ -59,6 +66,7 @@ export const Tabs = () => {
       <Tab.Screen
         name="Categories"
         component={CategoriesScreen}
+        listeners={{ focus: () => setAddButtonScreen("CATEGORY") }}
         options={{
           tabBarIcon: ({ focused }) => (
             <View>
@@ -77,7 +85,9 @@ export const Tabs = () => {
       />
       <Tab.Screen
         name="AddTask"
-        component={AddTaskScreen}
+        component={
+          addButtonScreen === "TASK" ? AddTaskScreen : AddCategoryScreen
+        }
         options={{
           tabBarIcon: ({ focused }) => (
             <Image

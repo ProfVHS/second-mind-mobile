@@ -14,13 +14,13 @@ import {
   connectToDatabase,
   createTables,
   deleteTaskById,
-  getCategories,
   getTasks,
   setTaskStatus,
 } from "../database/database";
 import { Task } from "../components/Task";
 import { NavigationProp } from "@react-navigation/native";
 import { categoryType, filter, taskType } from "../types";
+import { getCategories } from "../database/category";
 
 interface HomeScreenProps {
   navigation: NavigationProp<any>;
@@ -120,9 +120,8 @@ export const HomeScreen = ({ navigation }: HomeScreenProps) => {
                 onEdit={() => handleEditTask(item)}
                 onStatusChange={() => handleTaskStatusChange(item)}
                 category={
-                  categories.length > 0
-                    ? categories.find((c) => c.id === item.category)!.name
-                    : "Uncategorized"
+                  categories.find((c) => c.id === item.category)?.name ||
+                  "Uncategorized"
                 }
               />
             )}
@@ -139,6 +138,7 @@ export const HomeScreen = ({ navigation }: HomeScreenProps) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: "#F7F7F7",
   },
   buttonsWrapper: {
     display: "flex",

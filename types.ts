@@ -5,7 +5,7 @@ export type taskStatus = "done" | "todo";
 
 export type categoryType = {
   id?: number;
-  name: category;
+  name: string;
 };
 
 export type taskType = {

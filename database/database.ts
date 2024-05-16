@@ -1,5 +1,5 @@
 import * as SQLite from "expo-sqlite";
-import { categoryType, filter, taskStatus, taskType } from "../types";
+import { filter, taskType } from "../types";
 
 export const connectToDatabase = async () => {
   console.log("Connecting to database");
@@ -31,7 +31,7 @@ export const addTask = async (db: SQLite.SQLiteDatabase, task: taskType) => {
       `${task.title}`,
       `${task.description}`,
       `${task.priority}`,
-      0,
+      task.category,
       `${task.DueDate.toString()}`
     );
     console.log("Task added to database");
@@ -66,17 +66,6 @@ export const getTasks = async (
     )) as taskType[];
     setTasks(allRows);
   }
-};
-
-export const getCategories = async (
-  db: SQLite.SQLiteDatabase,
-  setCategories: (categories: categoryType[]) => void
-) => {
-  const allRows = (await db.getAllAsync(
-    "SELECT * FROM category"
-  )) as categoryType[];
-  console.log(allRows);
-  setCategories(allRows);
 };
 
 export const deleteTaskById = async (db: SQLite.SQLiteDatabase, id: number) => {

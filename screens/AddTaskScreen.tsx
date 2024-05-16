@@ -13,22 +13,21 @@ import { Picker } from "@react-native-picker/picker";
 import React, { useCallback, useEffect, useState } from "react";
 import RNDateTimePicker from "@react-native-community/datetimepicker";
 import { format } from "date-fns";
-import { category, priority, taskType } from "../types";
+import { category, categoryType, priority, taskType } from "../types";
 
 import { NavigationProp } from "@react-navigation/native";
 import { SQLiteDatabase } from "expo-sqlite";
 import { addTask, connectToDatabase } from "../database/database";
+import { getCategories } from "../database/category";
 
 interface AddTaskScreenProps {
   navigation: NavigationProp<any>;
 }
 
 export const AddTaskScreen = ({ navigation }: AddTaskScreenProps) => {
-  const [database, setDatabase] = useState<SQLiteDatabase | null>(null);
-
   const [taskName, setTaskName] = useState<string>("");
   const [taskDescription, setTaskDescription] = useState<string>("");
-  const [category, setCategory] = useState<category>("work");
+  const [category, setCategory] = useState<number>(-1);
   const [priority, setPriority] = useState<priority>("low"); // ["low", "medium", "high"]
   const [date, setDate] = useState(new Date());
 
@@ -36,11 +35,12 @@ export const AddTaskScreen = ({ navigation }: AddTaskScreenProps) => {
   const [isTimePickerVisible, setTimePickerVisibility] = useState(false);
 
   const [errors, setErrors] = useState<null | "taskName" | "taskTime">(); // ["taskName", "taskTime"]
+  const [categories, setCategories] = useState<categoryType[]>([]); // [id, categoryName
 
   const getDatabase = useCallback(async () => {
     try {
       const db = await connectToDatabase();
-      setDatabase(db);
+      await getCategories(db, setCategories);
     } catch (error) {
       console.error(error);
     }
@@ -73,7 +73,7 @@ export const AddTaskScreen = ({ navigation }: AddTaskScreenProps) => {
   const resetInputs = () => {
     setTaskName("");
     setTaskDescription("");
-    setCategory("work");
+    setCategory(-1);
     setPriority("low");
     const nowDate = new Date();
     if (nowDate.getMinutes() >= 30) nowDate.setHours(nowDate.getHours() + 1);
@@ -82,19 +82,8 @@ export const AddTaskScreen = ({ navigation }: AddTaskScreenProps) => {
     setErrors(null);
   };
 
+  // Adding task to database and navigating back to Home screen
   const handleSubmitAddingTask = async () => {
-    console.log(
-      "Task added - " +
-        taskName +
-        " " +
-        taskDescription +
-        " " +
-        category +
-        " " +
-        priority +
-        " " +
-        date
-    );
     if (taskName === "") {
       ToastAndroid.show("Task name cannot be empty", ToastAndroid.SHORT);
       setErrors("taskName");
@@ -106,17 +95,19 @@ export const AddTaskScreen = ({ navigation }: AddTaskScreenProps) => {
       return;
     }
 
-    //TODO - add task to the database
     const newTask: taskType = {
       title: taskName,
       description: taskDescription,
-      category: 0,
+      category: category,
       priority: priority,
       DueDate: date.toISOString(),
       isDone: false,
     };
 
-    await addTask(database!, newTask);
+    console.log(category);
+
+    const db = await connectToDatabase();
+    await addTask(db, newTask);
 
     resetInputs();
     navigation.goBack();
@@ -160,21 +151,14 @@ export const AddTaskScreen = ({ navigation }: AddTaskScreenProps) => {
               mode="dropdown"
               selectedValue={category}
               onValueChange={(itemValue, itemIndex) => setCategory(itemValue)}>
-              <Picker.Item
-                fontFamily="Poppins-Bold"
-                label="Work"
-                value="work"
-              />
-              <Picker.Item
-                fontFamily="Poppins-Bold"
-                label="Personal"
-                value="personal"
-              />
-              <Picker.Item
-                fontFamily="Poppins-Bold"
-                label="Shopping"
-                value="shopping"
-              />
+              {categories.map((category) => (
+                <Picker.Item
+                  key={category.id}
+                  label={category.name}
+                  value={category.id}
+                />
+              ))}
+              <Picker.Item label="Uncategorized" value={-1} />
             </Picker>
           </View>
           <View style={styles.priorityPicker}>

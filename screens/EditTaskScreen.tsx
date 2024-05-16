@@ -13,11 +13,12 @@ import { Picker } from "@react-native-picker/picker";
 import React, { useCallback, useEffect, useState } from "react";
 import RNDateTimePicker from "@react-native-community/datetimepicker";
 import { format } from "date-fns";
-import { category, priority, taskType } from "../types";
+import { category, categoryType, priority, taskType } from "../types";
 
 import { NavigationProp, RouteProp } from "@react-navigation/native";
 import { SQLiteDatabase } from "expo-sqlite";
 import { addTask, connectToDatabase, editTaskById } from "../database/database";
+import { getCategories } from "../database/category";
 
 interface AddTaskScreenProps {
   navigation: NavigationProp<any>;
@@ -29,7 +30,7 @@ export const EditTaskScreen = ({ navigation, route }: AddTaskScreenProps) => {
 
   const [taskName, setTaskName] = useState<string>("");
   const [taskDescription, setTaskDescription] = useState<string>("");
-  const [category, setCategory] = useState<category>("work");
+  const [category, setCategory] = useState<number>(0);
   const [priority, setPriority] = useState<priority>("low"); // ["low", "medium", "high"]
   const [date, setDate] = useState(new Date());
 
@@ -37,6 +38,20 @@ export const EditTaskScreen = ({ navigation, route }: AddTaskScreenProps) => {
   const [isTimePickerVisible, setTimePickerVisibility] = useState(false);
 
   const [errors, setErrors] = useState<null | "taskName" | "taskTime">(); // ["taskName", "taskTime"]
+  const [categories, setCategories] = useState<categoryType[]>([]);
+
+  const getDatabase = useCallback(async () => {
+    try {
+      const db = await connectToDatabase();
+      await getCategories(db, setCategories);
+    } catch (error) {
+      console.error(error);
+    }
+  }, []);
+
+  useEffect(() => {
+    getDatabase();
+  }, [getDatabase]);
 
   const handleTaskNameChange = (newTaskName: string) => {
     setTaskName(newTaskName);
@@ -61,7 +76,7 @@ export const EditTaskScreen = ({ navigation, route }: AddTaskScreenProps) => {
   const resetInputs = () => {
     setTaskName(taskToEdit!.title);
     setTaskDescription(taskToEdit!.description);
-    setCategory("work");
+    setCategory(taskToEdit!.category);
     setPriority(taskToEdit!.priority);
     const nowDate = new Date(taskToEdit!.DueDate);
     setDate(nowDate);
@@ -146,21 +161,14 @@ export const EditTaskScreen = ({ navigation, route }: AddTaskScreenProps) => {
               mode="dropdown"
               selectedValue={category}
               onValueChange={(itemValue, itemIndex) => setCategory(itemValue)}>
-              <Picker.Item
-                fontFamily="Poppins-Bold"
-                label="Work"
-                value="work"
-              />
-              <Picker.Item
-                fontFamily="Poppins-Bold"
-                label="Personal"
-                value="personal"
-              />
-              <Picker.Item
-                fontFamily="Poppins-Bold"
-                label="Shopping"
-                value="shopping"
-              />
+              {categories.map((category) => (
+                <Picker.Item
+                  key={category.id}
+                  label={category.name}
+                  value={category.id}
+                />
+              ))}
+              <Picker.Item label="Uncategorized" value={-1} />
             </Picker>
           </View>
           <View style={styles.priorityPicker}>
