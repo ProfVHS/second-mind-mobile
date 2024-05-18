@@ -1,9 +1,12 @@
 import * as SQLite from "expo-sqlite";
 import { filter, taskType } from "../types";
+import { format } from "date-fns";
 
 export const connectToDatabase = async () => {
   try {
-    const db = await SQLite.openDatabaseAsync("SecondMind");
+    const db = await SQLite.openDatabaseAsync("SecondMind", {
+      useNewConnection: true,
+    });
     return db;
   } catch (e) {
     console.log(e);
@@ -42,8 +45,7 @@ export const getTasks = async (
   filter: filter,
   setTasks: (tasks: taskType[]) => void
 ) => {
-  //const allRows = (await db.getAllAsync("SELECT * FROM todo")) as taskType[];
-  const formatedDate = date.toISOString().split("T")[0];
+  const formatedDate = format(date, "yyyy-MM-dd");
 
   if (filter === "all") {
     const allRows = (await db.getAllAsync(

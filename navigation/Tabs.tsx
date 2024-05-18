@@ -63,9 +63,9 @@ export const Tabs = () => {
         component={CategoriesStack}
         listeners={({ navigation, route }) => ({
           focus: () => setAddButtonScreen("CATEGORY"),
+          blur: () => navigation.setParams({ screen: "CategoriesScreen" }),
         })}
         options={{
-          unmountOnBlur: true,
           tabBarIcon: ({ focused }) => (
             <View>
               <Image
@@ -106,6 +106,7 @@ export const Tabs = () => {
         name="Calendar"
         component={CalendarScreen}
         options={{
+          unmountOnBlur: true,
           tabBarIcon: ({ focused }) => (
             <View>
               <Image

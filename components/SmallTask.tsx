@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, Image, TouchableOpacity } from "react-native";
+import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import React, { useEffect, useState } from "react";
 import { taskType } from "../types";
 import { Shadow } from "react-native-shadow-2";
@@ -13,7 +13,7 @@ type TaskProps = {
   onEdit: () => void;
   onStatusChange: () => void;
 };
-export const Task = ({
+export const SmallTask = ({
   task,
   category,
   onDelete,
@@ -60,7 +60,7 @@ export const Task = ({
         onSwipeLeft={swipeLeft}
         onSwipeRight={swipeRight}>
         <Shadow distance={1} offset={[0, 4]} stretch={true}>
-          <View style={styles.content}>
+          <View style={styles.task}>
             <View
               style={[
                 styles.priorityDot,
@@ -71,9 +71,11 @@ export const Task = ({
                   : styles.priorityLow,
               ]}
             />
-            <View>
-              <Text style={styles.taskName}>{task.title}</Text>
-              <Text style={styles.taskTimeLeft}>{timeLeft}</Text>
+            <View style={styles.content}>
+              <View style={styles.row}>
+                <Text style={styles.taskName}>{task.title}</Text>
+                <Text style={styles.taskTimeLeft}>{timeLeft}</Text>
+              </View>
               <Text style={styles.taskDescription}>{task.description}</Text>
             </View>
             <Text style={styles.taskCategory}>{category}</Text>
@@ -129,23 +131,38 @@ const styles = StyleSheet.create({
     marginVertical: 8,
     marginHorizontal: 6,
   },
-  content: {
+  task: {
     backgroundColor: "#fff",
-    borderRadius: 10,
-    padding: 10,
-
+    borderRadius: 4,
+    padding: 8,
     display: "flex",
     flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 10,
+  },
+  content: {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    gap: 2,
+  },
+  row: {
+    width: "100%",
+    display: "flex",
+    flexDirection: "row",
+    justifyContent: "flex-start",
+    alignItems: "center",
     gap: 10,
   },
   taskName: {
-    fontSize: 20,
-    fontWeight: "bold",
+    fontFamily: "Poppins-Bold",
+    fontSize: 16,
     color: "#000",
   },
   taskDescription: {
-    fontSize: 16,
-    fontWeight: "500",
+    width: "100%",
+    fontSize: 12,
+    fontFamily: "Poppins-Bold",
     color: "#A2A2A2",
   },
   taskCategory: {
@@ -159,7 +176,7 @@ const styles = StyleSheet.create({
   },
   taskTimeLeft: {
     fontSize: 12,
-    fontWeight: "600",
+    fontFamily: "Poppins-Regular",
     color: "#A2A2A2",
   },
   priorityDot: {

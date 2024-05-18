@@ -12,7 +12,6 @@ import { format, set } from "date-fns";
 import { Button } from "../components/Button";
 import {
   connectToDatabase,
-  createTables,
   deleteTaskById,
   getTasks,
   setTaskStatus,
@@ -36,9 +35,10 @@ export const HomeScreen = ({ navigation }: HomeScreenProps) => {
 
   const loadData = useCallback(async () => {
     try {
+      console.log("Loading data");
       const db = await connectToDatabase();
-      const todos = getTasks(db, new Date(), filter, setTasks);
-      const categories = getCategories(db, setCategories);
+      await getTasks(db, new Date(), filter, setTasks);
+      await getCategories(db, setCategories);
       setIsLoading(false);
     } catch (error) {
       console.error(error);
@@ -52,7 +52,6 @@ export const HomeScreen = ({ navigation }: HomeScreenProps) => {
   // on focus listener
   useEffect(() => {
     const unsubscribe = navigation.addListener("focus", async () => {
-      console.log("Home screen focused - " + filter);
       setFilter("todo");
       loadData();
     });
